@@ -2,6 +2,7 @@ var inquirer = require("inquirer");
 var mysql = require("mysql");
 require("dotenv").config();
 
+
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -35,7 +36,13 @@ function select_product() {
 	inquirer.prompt({
 		name: "item_id",
 		type: "input",
-		message: "Enter the product ID of the product you would like to purchase."
+		message: "Enter the product ID of the product you would like to purchase.",
+		validate: function (value) {
+			if (isNaN(value) === false) {
+				return true;
+			}
+			return false;
+		}
 	}).then(function (answer) {
 		console.log("answer + " + JSON.stringify(answer) + "type: " + typeof (answer.item_id));
 		// if(answer.item_id)
@@ -52,7 +59,13 @@ function how_many(item_id) {
 	inquirer.prompt({
 		name: "how_much",
 		type: "input",
-		message: "Enter the amount that you would like to purchase."
+		message: "Enter the amount that you would like to purchase.",
+		validate: function (value) {
+			if (isNaN(value) === false) {
+				return true;
+			}
+			return false;
+		}
 	}).then(function (answer) {
 		quantity = answer.how_much;
 		console.log("quantity: " + quantity);
