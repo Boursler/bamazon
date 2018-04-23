@@ -30,6 +30,7 @@ function managerChoices() {
 		]
 	}).then(function (answer) {
 		console.log(answer.option);
+		//run requested function
 		switch (answer.option) {
 			case "View products for sale":
 				view_products();
@@ -42,8 +43,10 @@ function managerChoices() {
 				break;
 			case "Add new product":
 				add_product();
+				break;
 			case "Exit":
 				connection.end();
+				break;
 		}
 	})
 
@@ -122,6 +125,7 @@ function add_inventory() {
 			var stock;
 			connection.query("SELECT stock_quantity FROM products WHERE ?", { item_id: product }, function (error, results) {
 				if (error) throw error;
+				//find stock after addition
 				stock = results[0].stock_quantity + quantity;
 				var query = "UPDATE products SET ? WHERE ?";
 				connection.query(query, [
@@ -133,10 +137,8 @@ function add_inventory() {
 					}
 				], function (error, results) {
 					if (error) throw error;
-					// console.log(results[0].product_name + ": " + results[0].stock_quantity + "\n")
 					display_update(product);
-					console.log(results);
-					// back_to_menu();
+
 				})
 			})
 		})
@@ -168,6 +170,7 @@ function add_product() {
 			type: "input",
 			message: "Enter price in decimal form",
 			validate: function (value) {
+				//validate input is in currency form
 				var regex = /^\d+(?:\.\d{0,2})$/;
 				if (regex.test(value))
 					return true;
@@ -183,7 +186,8 @@ function add_product() {
 				if (isNaN(value) === false) {
 					return true;
 				}
-				return false;
+				else
+					return false;
 			}
 		}
 	]).then(function (answers) {

@@ -2,7 +2,7 @@ var inquirer = require("inquirer");
 var mysql = require("mysql");
 require("dotenv").config();
 
-
+//use dotenv to conceal password
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -63,8 +63,6 @@ function select_product() {
 		if (answer.exit)
 			connection.end()
 		else {
-			console.log("answer + " + JSON.stringify(answer) + "type: " + typeof (answer.item_id));
-			// if(answer.item_id)
 			product = answer.item_id;
 			how_many(product);
 		}
@@ -103,6 +101,7 @@ function how_many(item_id) {
 	}).then(function (answer) {
 		quantity = answer.how_much;
 		console.log("quantity: " + quantity);
+		//pass in values that stock will need to run
 		stock(item_id, quantity)
 	})
 	return quantity;
@@ -113,18 +112,19 @@ function stock(item_id, quantity) {
 	var query = "SELECT item_id,stock_quantity FROM products WHERE ?";
 	connection.query(query, { item_id: item_id }, function (error, results) {
 		if (error) throw error;
-		console.log(JSON.stringify(results) + "stock results at item_id");
 		var stock = parseInt(results[0].stock_quantity);
-		console.log("stock: " + stock + typeof (stock));
 		quantity = parseInt(quantity);
-		console.log("quantity " + typeof (quantity));
+		//check that there is enough available stock, then reduce stock by the quantity to be purchased
 		if (results[0].stock_quantity >= quantity) {
 			stock = stock - quantity;
 			console.log("new quantity " + quantity);
 			purchase(item_id, stock, quantity);
 		}
-		else
+		//if insufficient stock, do not allow to continue
+		else {
 			console.log("Insufficient quantity!");
+			back_to_menu();
+		}
 	});
 }
 //store does have enough of the product, you should fulfill the customer's order.
@@ -140,8 +140,6 @@ function purchase(item_id, stock, quantity) {
 	], function (error, results) {
 		if (error) throw error;
 		console.log(JSON.stringify(results) + "purchase");
-		console.log("quantity in purchase func " + quantity + typeof (quantity));
-		console.log(results.affectedRows + "rows affected");
 		priceCalculate(item_id, quantity);
 
 	})
@@ -152,7 +150,7 @@ function priceCalculate(item_id, quantity) {
 	connection.query(query, { item_id: item_id }, function (error, results) {
 		if (error) throw error;
 		var cost = results[0].price * quantity;
-		console.log("Total price is " + cost);
+		console.log("Total price is $" + cost);
 		back_to_menu();
 	});
 
