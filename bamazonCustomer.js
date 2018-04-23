@@ -26,9 +26,25 @@ connection.query("SELECT * FROM products", function (error, results) {
 			"\n"
 		);
 	}
-	select_product();
+	first_choice();
 
 });
+
+function first_choice() {
+	inquirer.prompt(
+		{
+			name: "choices",
+			type: "list",
+			message: "What would you like to do?",
+			choices: ["Select a product to buy", "Exit"]
+		}
+	).then(function (answer) {
+		if (answer.choices === "Exit")
+			connection.end();
+		else
+			select_product();
+	})
+}
 
 //ID of the product they would like to buy.
 function select_product() {
@@ -44,13 +60,31 @@ function select_product() {
 			return false;
 		}
 	}).then(function (answer) {
-		console.log("answer + " + JSON.stringify(answer) + "type: " + typeof (answer.item_id));
-		// if(answer.item_id)
-		product = answer.item_id;
-		how_many(product);
+		if (answer.exit)
+			connection.end()
+		else {
+			console.log("answer + " + JSON.stringify(answer) + "type: " + typeof (answer.item_id));
+			// if(answer.item_id)
+			product = answer.item_id;
+			how_many(product);
+		}
 
 	})
 	return product;
+}
+
+function back_to_menu() {
+	inquirer.prompt({
+		name: "main",
+		type: "confirm",
+		message: "Would you like to return to the main menu?"
+	}).then(function (answer) {
+		if (answer.main)
+			first_choice();
+		else
+			connection.end();
+	})
+
 }
 
 //how many units of the product they would like to buy
@@ -119,7 +153,8 @@ function priceCalculate(item_id, quantity) {
 		if (error) throw error;
 		var cost = results[0].price * quantity;
 		console.log("Total price is " + cost);
+		back_to_menu();
 	});
-	connection.end();
+
 }
 
